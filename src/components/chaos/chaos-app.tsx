@@ -52,8 +52,8 @@ export function ChaosApp() {
           <ChaosCanvas
             key={simulationKey}
             initialConditions={initialConditions}
-            traceColor="hsl(var(--primary))"
-            pendulumColor="hsl(var(--accent))"
+            traceColor="#FFFF00"
+            pendulumColor="#FF00FF"
             isRunning={isRunning}
           />
         </section>
