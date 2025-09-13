@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -43,10 +43,13 @@ const DEFAULT_PARAMS: FractalParams = {
   colorPalette: ["#BE29EC", "#29A6EC", "#e9c46a", "#f4a261", "#e76f51"],
 };
 
+const BUTTERFLY_EFFECT_DELTA = 0.00001;
+
 export function ChoreographApp() {
   const [params, setParams] = useState<FractalParams>(DEFAULT_PARAMS);
   const [isRandomizing, setIsRandomizing] = useState(false);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const mainCanvasRef = useRef<HTMLCanvasElement>(null);
+  const ghostCanvasRef = useRef<HTMLCanvasElement>(null);
   const { toast } = useToast();
 
   const form = useForm<Omit<FractalParams, 'controlPoints' | 'colorPalette'>>({
@@ -57,8 +60,26 @@ export function ChoreographApp() {
       angle: DEFAULT_PARAMS.angle,
       scale: DEFAULT_PARAMS.scale,
     },
-    mode: "onChange",
+    mode: "onBlur",
   });
+  
+  const ghostParams = useMemo<FractalParams>(() => ({
+    ...params,
+    seed: params.seed + BUTTERFLY_EFFECT_DELTA,
+  }), [params]);
+
+  useEffect(() => {
+    const subscription = form.watch((value, { name, type }) => {
+       if (type === 'change') {
+        const validatedValues = fractalParamsSchema.omit({ controlPoints: true, colorPalette: true }).safeParse(value);
+        if(validatedValues.success) {
+            handleParamsChange(validatedValues.data);
+        }
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form.watch]);
+
 
   const handleParamsChange = (newValues: Partial<Omit<FractalParams, 'controlPoints' | 'colorPalette'>>) => {
     setParams(prev => ({...prev, ...newValues}));
@@ -108,7 +129,7 @@ export function ChoreographApp() {
   };
 
   const handleSaveImage = () => {
-    const canvas = canvasRef.current;
+    const canvas = mainCanvasRef.current;
     if (canvas) {
       const link = document.createElement('a');
       link.download = `choreograph-seed-${params.seed}.png`;
@@ -132,13 +153,30 @@ export function ChoreographApp() {
             isRandomizing={isRandomizing}
           />
         </aside>
-        <section className="bg-card border rounded-lg overflow-hidden relative">
-          <ChoreographCanvas
-            ref={canvasRef}
-            params={params}
-            onControlPointsChange={(newPoints: Point[]) => setParams(prev => ({ ...prev, controlPoints: newPoints }))}
-          />
-        </section>
+        <div className="grid md:grid-cols-2 gap-4 min-h-0">
+            <section className="bg-card border rounded-lg overflow-hidden relative">
+                <div className="absolute top-2 left-2 bg-background/80 px-2 py-1 rounded-md text-sm text-foreground">
+                    Original
+                </div>
+                <ChoreographCanvas
+                    ref={mainCanvasRef}
+                    params={params}
+                    onControlPointsChange={(newPoints: Point[]) => setParams(prev => ({ ...prev, controlPoints: newPoints }))}
+                    interactive={true}
+                />
+            </section>
+            <section className="bg-card border rounded-lg overflow-hidden relative">
+                <div className="absolute top-2 left-2 bg-background/80 px-2 py-1 rounded-md text-sm text-foreground z-10">
+                   Ghost (Seed +{BUTTERFLY_EFFECT_DELTA})
+                </div>
+                <ChoreographCanvas
+                    ref={ghostCanvasRef}
+                    params={ghostParams}
+                    onControlPointsChange={() => {}} // No-op
+                    interactive={false}
+                />
+            </section>
+        </div>
       </main>
     </div>
   );

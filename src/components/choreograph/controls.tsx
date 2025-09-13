@@ -16,7 +16,7 @@ import { Slider } from "@/components/ui/slider";
 
 type ControlProps = {
   form: UseFormReturn<Omit<FractalParams, 'controlPoints' | 'colorPalette'>>;
-  onFormChange: (data: Omit<FractalParams, 'controlPoints' | 'colorPalette'>) => void;
+  onFormChange: (data: Partial<Omit<FractalParams, 'controlPoints' | 'colorPalette'>>) => void;
   onReset: () => void;
   onRandomize: () => void;
   onSaveImage: () => void;
@@ -32,12 +32,12 @@ export function ChoreographControls({
   isRandomizing,
 }: ControlProps) {
   
-  const watchedValues = form.watch();
-
   useEffect(() => {
     const subscription = form.watch((value, { name, type }) => {
-      if(type === 'change') {
-        onFormChange(value as Omit<FractalParams, 'controlPoints' | 'colorPalette'>);
+      if (type === 'change' && name) {
+        const fieldName = name as keyof Omit<FractalParams, 'controlPoints' | 'colorPalette'>;
+        const singleValue = { [fieldName]: value[fieldName] };
+        onFormChange(singleValue);
       }
     });
     return () => subscription.unsubscribe();

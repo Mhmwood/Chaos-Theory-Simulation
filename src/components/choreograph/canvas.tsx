@@ -8,13 +8,14 @@ export type Point = { x: number; y: number };
 type ChoreographCanvasProps = {
   params: FractalParams;
   onControlPointsChange: (points: Point[]) => void;
+  interactive?: boolean;
 };
 
 const CONTROL_POINT_RADIUS = 10;
 const CONTROL_POINT_HOVER_RADIUS = 14;
 
 export const ChoreographCanvas = forwardRef<HTMLCanvasElement, ChoreographCanvasProps>(
-  ({ params, onControlPointsChange }, ref) => {
+  ({ params, onControlPointsChange, interactive = true }, ref) => {
     const internalRef = useRef<HTMLCanvasElement | null>(null);
     const animationFrameId = useRef<number>();
     const transitionStartTime = useRef<number | null>(null);
@@ -66,22 +67,24 @@ export const ChoreographCanvas = forwardRef<HTMLCanvasElement, ChoreographCanvas
 
       drawBranch(ctx, startPoint.x, startPoint.y, -90, initialLength, params.iterations, currentParams);
 
-      params.controlPoints.forEach((p, index) => {
-        const x = p.x * physicalWidth;
-        const y = p.y * physicalHeight;
-        const isPointDragging = draggingPointIndex === index;
-        const isPointHovering = hoveringPointIndex === index;
+      if (interactive) {
+        params.controlPoints.forEach((p, index) => {
+          const x = p.x * physicalWidth;
+          const y = p.y * physicalHeight;
+          const isPointDragging = draggingPointIndex === index;
+          const isPointHovering = hoveringPointIndex === index;
 
-        ctx.beginPath();
-        ctx.arc(x, y, isPointHovering || isPointDragging ? CONTROL_POINT_HOVER_RADIUS : CONTROL_POINT_RADIUS, 0, 2 * Math.PI);
-        ctx.fillStyle = isPointDragging ? "hsl(var(--primary))" : "hsl(var(--accent))";
-        ctx.globalAlpha = isPointHovering || isPointDragging ? 1.0 : 0.8;
-        ctx.fill();
-        ctx.strokeStyle = "hsla(var(--primary-foreground), 0.9)";
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        ctx.globalAlpha = 1.0;
-      });
+          ctx.beginPath();
+          ctx.arc(x, y, isPointHovering || isPointDragging ? CONTROL_POINT_HOVER_RADIUS : CONTROL_POINT_RADIUS, 0, 2 * Math.PI);
+          ctx.fillStyle = isPointDragging ? "hsl(var(--primary))" : "hsl(var(--accent))";
+          ctx.globalAlpha = isPointHovering || isPointDragging ? 1.0 : 0.8;
+          ctx.fill();
+          ctx.strokeStyle = "hsla(var(--primary-foreground), 0.9)";
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          ctx.globalAlpha = 1.0;
+        });
+      }
 
       if (progress < 1) {
         animationFrameId.current = requestAnimationFrame((newTime) => draw(ctx, newTime));
@@ -163,6 +166,7 @@ export const ChoreographCanvas = forwardRef<HTMLCanvasElement, ChoreographCanvas
     }
 
     const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+      if (!interactive) return;
       const pos = getMousePos(e);
       const canvas = getCanvas();
       if (!canvas) return;
@@ -181,6 +185,7 @@ export const ChoreographCanvas = forwardRef<HTMLCanvasElement, ChoreographCanvas
     };
 
     const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+      if (!interactive) return;
       const pos = getMousePos(e);
       const canvas = getCanvas();
       if (!canvas) return;
@@ -208,6 +213,7 @@ export const ChoreographCanvas = forwardRef<HTMLCanvasElement, ChoreographCanvas
     };
     
     const handleMouseUp = () => {
+      if (!interactive) return;
       if (draggingPointIndex !== null) {
         setDraggingPointIndex(null);
         previousParams.current = params;
@@ -215,6 +221,7 @@ export const ChoreographCanvas = forwardRef<HTMLCanvasElement, ChoreographCanvas
     };
 
     const handleMouseLeave = () => {
+        if (!interactive) return;
         handleMouseUp();
         setHoveringPointIndex(null);
     };
@@ -230,7 +237,7 @@ export const ChoreographCanvas = forwardRef<HTMLCanvasElement, ChoreographCanvas
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseLeave}
         className="w-full h-full"
-        style={{ cursor: draggingPointIndex !== null ? 'grabbing' : hoveringPointIndex !== null ? 'pointer' : 'default' }}
+        style={{ cursor: interactive && (draggingPointIndex !== null ? 'grabbing' : hoveringPointIndex !== null ? 'pointer' : 'default') || 'default' }}
       />
     );
   }
