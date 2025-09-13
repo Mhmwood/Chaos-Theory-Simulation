@@ -20,6 +20,13 @@ export function ChaosApp() {
   // A key to force-remount the canvas and restart the simulation
   const [simulationKey, setSimulationKey] = useState(Date.now());
 
+  const ghostInitialConditions = useMemo(() => {
+    return {
+      ...initialConditions,
+      a2: initialConditions.a2 + 0.0001, // Tiny difference
+    };
+  }, [initialConditions]);
+  
   const handleRestart = () => {
     setIsRunning(false);
     // Give it a moment to stop, then restart
@@ -45,7 +52,7 @@ export function ChaosApp() {
   return (
     <div className="flex flex-col h-screen bg-background text-foreground">
       <Header onRestart={handleRestart} />
-      <main className="flex-1 grid grid-cols-1 gap-4 p-4 min-h-0">
+      <main className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 p-4 min-h-0">
         <section className="bg-card border rounded-lg overflow-hidden relative">
           <ChaosCanvas
             key={`${simulationKey}-original`}
@@ -54,6 +61,21 @@ export function ChaosApp() {
             pendulumColor="hsl(var(--accent))"
             isRunning={isRunning}
           />
+          <div className="absolute top-4 left-4 text-sm font-semibold bg-background/50 backdrop-blur-sm px-2 py-1 rounded">
+              Original
+          </div>
+        </section>
+        <section className="bg-card border rounded-lg overflow-hidden relative">
+          <ChaosCanvas
+            key={`${simulationKey}-ghost`}
+            initialConditions={ghostInitialConditions}
+            traceColor="hsl(var(--secondary))"
+            pendulumColor="hsl(var(--muted-foreground))"
+            isRunning={isRunning}
+          />
+          <div className="absolute top-4 left-4 text-sm font-semibold bg-background/50 backdrop-blur-sm px-2 py-1 rounded">
+              Ghost (Slightly Altered)
+          </div>
         </section>
       </main>
     </div>
