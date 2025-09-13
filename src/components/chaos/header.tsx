@@ -1,15 +1,16 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { PanelRightClose, PanelRightOpen, RotateCw } from "lucide-react";
+import { RotateCw } from "lucide-react";
+import type { ReactNode } from "react";
 
 type HeaderProps = {
   onRestart: () => void;
-  onToggleControls: () => void;
-  showControls: boolean;
+  children: ReactNode;
 };
 
-export function Header({ onRestart, onToggleControls, showControls }: HeaderProps) {
+export function Header({ onRestart, children }: HeaderProps) {
   return (
     <header className="flex items-center justify-between p-4 border-b">
       <div className="flex items-center gap-4">
@@ -22,10 +23,7 @@ export function Header({ onRestart, onToggleControls, showControls }: HeaderProp
         <Button onClick={onRestart} variant="outline">
           <RotateCw className="mr-2 h-4 w-4" /> Restart
         </Button>
-        <Button onClick={onToggleControls} variant="outline">
-          {showControls ? <PanelRightClose className="mr-2 h-4 w-4" /> : <PanelRightOpen className="mr-2 h-4 w-4" />}
-          {showControls ? "Hide Controls" : "Show Controls"}
-        </Button>
+        {children}
       </div>
     </header>
   );
