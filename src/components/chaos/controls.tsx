@@ -1,4 +1,3 @@
-
 "use client";
 
 import { PendulumParams } from "./chaos-app";
@@ -64,7 +63,7 @@ export function ControlPanel({ params, onParamChange }: ControlPanelProps) {
                         max={200}
                         step={1}
                         value={[params.l2]}
-                        onValue-change={(value) => onParamChange({ l2: value[0] })}
+                        onValueChange={(value) => onParamChange({ l2: value[0] })}
                         />
                          <span className="text-sm font-medium w-12 text-right">{params.l2}</span>
                     </div>
