@@ -72,7 +72,7 @@ export function ChaosApp() {
           />
         </section>
         {showControls && (
-            <aside className="bg-black border rounded-lg overflow-y-auto">
+            <aside className="bg-black border rounded-lg overflow-y-auto md:col-span-1">
                 <ControlPanel params={params} onParamChange={handleParamChange} />
             </aside>
         )}
