@@ -1,5 +1,5 @@
-import { ChoreographApp } from "@/components/choreograph/choreograph-app";
+import { ChaosApp } from "@/components/chaos/chaos-app";
 
 export default function Home() {
-  return <ChoreographApp />;
+  return <ChaosApp />;
 }
