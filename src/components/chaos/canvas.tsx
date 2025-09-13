@@ -82,9 +82,9 @@ export const ChaosCanvas = forwardRef<HTMLCanvasElement, ChaosCanvasProps>(
       const { l1, l2 } = initialConditions;
       const { a1, a2 } = state.current;
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "hsl(var(--background))";
-      ctx.fillRect(0, 0, physicalWidth, physicalHeight);
+      ctx.save();
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, physicalWidth, physicalHeight);
 
       const pivotX = physicalWidth / 2;
       const pivotY = physicalHeight / 2.5;
@@ -101,17 +101,18 @@ export const ChaosCanvas = forwardRef<HTMLCanvasElement, ChaosCanvasProps>(
       }
       
       // Draw trace
-      ctx.beginPath();
-      ctx.moveTo(trace.current[0].x, trace.current[0].y);
-      for (let i = 1; i < trace.current.length; i++) {
-        ctx.lineTo(trace.current[i].x, trace.current[i].y);
+      if (trace.current.length > 1) {
+        ctx.beginPath();
+        ctx.moveTo(trace.current[0].x, trace.current[0].y);
+        for (let i = 1; i < trace.current.length; i++) {
+          ctx.lineTo(trace.current[i].x, trace.current[i].y);
+        }
+        ctx.strokeStyle = traceColor;
+        ctx.lineWidth = 2;
+        ctx.globalAlpha = 0.7;
+        ctx.stroke();
+        ctx.globalAlpha = 1;
       }
-      ctx.strokeStyle = traceColor;
-      ctx.lineWidth = 2;
-      ctx.globalAlpha = 0.7;
-      ctx.stroke();
-      ctx.globalAlpha = 1;
-
 
       // Draw pendulum arms
       ctx.beginPath();
@@ -130,13 +131,14 @@ export const ChaosCanvas = forwardRef<HTMLCanvasElement, ChaosCanvasProps>(
       ctx.beginPath();
       ctx.arc(x2, y2, initialConditions.m2, 0, Math.PI * 2);
       ctx.fill();
+      ctx.restore();
     };
     
     const animate = () => {
       if (isRunning) {
         update();
-        draw();
       }
+      draw();
       animationFrameId.current = requestAnimationFrame(animate);
     };
 
@@ -152,10 +154,6 @@ export const ChaosCanvas = forwardRef<HTMLCanvasElement, ChaosCanvasProps>(
             canvas.height = height * dpr;
             canvas.style.width = `${width}px`;
             canvas.style.height = `${height}px`;
-            const ctx = canvas.getContext('2d');
-            if (ctx) {
-                ctx.scale(dpr, dpr);
-            }
         };
 
         const resizeObserver = new ResizeObserver(resizeHandler);
@@ -166,7 +164,19 @@ export const ChaosCanvas = forwardRef<HTMLCanvasElement, ChaosCanvasProps>(
     }, []);
 
     useEffect(() => {
+      state.current = {
+        a1: initialConditions.a1,
+        a2: initialConditions.a2,
+        a1_v: 0,
+        a2_v: 0,
+      };
+      trace.current = [];
+      
+      if (animationFrameId.current) {
+        cancelAnimationFrame(animationFrameId.current);
+      }
       animationFrameId.current = requestAnimationFrame(animate);
+      
       return () => {
         if (animationFrameId.current) {
           cancelAnimationFrame(animationFrameId.current);

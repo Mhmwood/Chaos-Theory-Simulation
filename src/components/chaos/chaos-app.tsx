@@ -45,7 +45,7 @@ export function ChaosApp() {
 
 
   return (
-    <div className="flex flex-col h-screen bg-background text-foreground">
+    <div className="flex flex-col h-screen text-foreground">
       <Header onRestart={handleRestart} />
       <main className="flex-1 grid grid-cols-1 gap-4 p-4 min-h-0">
         <section className="bg-card border rounded-lg overflow-hidden relative">
