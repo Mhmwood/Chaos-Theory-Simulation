@@ -3,7 +3,12 @@
 import { PendulumParams } from "./chaos-app";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 type ControlPanelProps = {
   params: PendulumParams;
@@ -12,14 +17,13 @@ type ControlPanelProps = {
 
 export function ControlPanel({ params, onParamChange }: ControlPanelProps) {
   return (
-    <Card className="bg-transparent border-none">
-      <CardHeader>
-        <CardTitle>Controls</CardTitle>
-      </CardHeader>
-      <CardContent className="grid gap-6">
-        <div className="grid gap-2">
+      <Accordion type="multiple" defaultValue={["item-1", "item-2"]} className="w-full">
+        <AccordionItem value="item-1">
+          <AccordionTrigger>
             <h3 className="text-lg font-semibold">Pendulum 1</h3>
-            <div className="grid gap-4">
+          </AccordionTrigger>
+          <AccordionContent>
+            <div className="grid gap-4 pt-2">
                 <div className="grid gap-2">
                     <Label htmlFor="l1">Length (l1)</Label>
                     <div className="flex items-center gap-4">
@@ -49,11 +53,14 @@ export function ControlPanel({ params, onParamChange }: ControlPanelProps) {
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div className="grid gap-2">
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="item-2">
+          <AccordionTrigger>
             <h3 className="text-lg font-semibold">Pendulum 2</h3>
-            <div className="grid gap-4">
+          </AccordionTrigger>
+          <AccordionContent>
+            <div className="grid gap-4 pt-2">
                 <div className="grid gap-2">
                     <Label htmlFor="l2">Length (l2)</Label>
                     <div className="flex items-center gap-4">
@@ -83,8 +90,8 @@ export function ControlPanel({ params, onParamChange }: ControlPanelProps) {
                     </div>
                 </div>
             </div>
-        </div>
-      </CardContent>
-    </Card>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
   );
 }
