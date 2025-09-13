@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -23,7 +22,7 @@ export function Header({ onRestart, onToggleControls, showControls }: HeaderProp
         <Button onClick={onRestart} variant="outline">
           <RotateCw className="mr-2 h-4 w-4" /> Restart
         </Button>
-        <Button onClick={onToggleControls} variant="outline" className="hidden md:flex">
+        <Button onClick={onToggleControls} variant="outline">
           {showControls ? <PanelRightClose className="mr-2 h-4 w-4" /> : <PanelRightOpen className="mr-2 h-4 w-4" />}
           {showControls ? "Hide Controls" : "Show Controls"}
         </Button>
