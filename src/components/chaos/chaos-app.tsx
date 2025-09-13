@@ -37,6 +37,16 @@ export function ChaosApp() {
     }, 100);
   };
 
+  const handleToggleControls = () => {
+    setShowControls(prev => {
+      // If we are about to hide the controls, restart the simulation.
+      if (prev) {
+        handleRestart();
+      }
+      return !prev;
+    });
+  }
+
   const initialConditions = useMemo(() => ({
     ...params,
     a1: Math.PI / 1.5,
@@ -58,7 +68,7 @@ export function ChaosApp() {
     <div className="flex flex-col h-screen bg-black text-foreground">
       <Header 
         onRestart={handleRestart} 
-        onToggleControls={() => setShowControls(prev => !prev)}
+        onToggleControls={handleToggleControls}
         showControls={showControls}
         />
       <main className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 p-4 min-h-0">
