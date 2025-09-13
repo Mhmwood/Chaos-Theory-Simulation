@@ -5,6 +5,7 @@ import { useState, useMemo, useEffect } from "react";
 import { Header } from "@/components/chaos/header";
 import { ChaosCanvas } from "@/components/chaos/canvas";
 import { ControlPanel } from "@/components/chaos/controls";
+import { cn } from "@/lib/utils";
 
 export type PendulumParams = {
   l1: number;
@@ -22,6 +23,7 @@ export function ChaosApp() {
   });
 
   const [isRunning, setIsRunning] = useState(true);
+  const [showControls, setShowControls] = useState(true);
 
   // A key to force-remount the canvas and restart the simulation
   const [simulationKey, setSimulationKey] = useState(Date.now());
@@ -54,9 +56,13 @@ export function ChaosApp() {
 
   return (
     <div className="flex flex-col h-screen bg-black text-foreground">
-      <Header onRestart={handleRestart} />
+      <Header 
+        onRestart={handleRestart} 
+        onToggleControls={() => setShowControls(prev => !prev)}
+        showControls={showControls}
+        />
       <main className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 p-4 min-h-0">
-        <section className="md:col-span-2 bg-black border rounded-lg overflow-hidden relative">
+        <section className={cn("bg-black border rounded-lg overflow-hidden relative transition-all duration-300", showControls ? "md:col-span-2" : "md:col-span-3")}>
           <ChaosCanvas
             key={simulationKey}
             initialConditions={initialConditions}
@@ -65,9 +71,11 @@ export function ChaosApp() {
             isRunning={isRunning}
           />
         </section>
-        <aside className="bg-black border rounded-lg overflow-y-auto">
-          <ControlPanel params={params} onParamChange={handleParamChange} />
-        </aside>
+        {showControls && (
+            <aside className="bg-black border rounded-lg overflow-y-auto">
+                <ControlPanel params={params} onParamChange={handleParamChange} />
+            </aside>
+        )}
       </main>
     </div>
   );
