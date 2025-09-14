@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { SlidersHorizontal, PlusCircle } from "lucide-react";
+import { hslToHex } from "@/lib/utils";
 
 export type PendulumParams = {
   l1: number;
@@ -37,6 +38,8 @@ export type PendulumSystem = {
 
 const createNewPendulum = (id: number): PendulumSystem => {
     const randomAngle = () => Math.PI / 2 + (Math.random() - 0.5) * 0.5;
+    const randomH = Math.random() * 360;
+
     return {
         id,
         params: {
@@ -46,8 +49,8 @@ const createNewPendulum = (id: number): PendulumSystem => {
             m2: 8 + Math.random() * 14,
         },
         appearance: {
-            traceColor: `hsl(${Math.random() * 360}, 100%, 75%)`,
-            pendulumColor: `hsl(${Math.random() * 360}, 100%, 75%)`,
+            traceColor: hslToHex(randomH, 100, 75),
+            pendulumColor: hslToHex(randomH + 60 % 360, 100, 75),
         },
         initialAngles: {
             a1: randomAngle(),
