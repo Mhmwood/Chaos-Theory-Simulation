@@ -12,7 +12,7 @@ type HeaderProps = {
 
 export function Header({ onRestart, children }: HeaderProps) {
   return (
-    <header className="flex items-center justify-between p-4 border-b">
+    <header className="flex items-center justify-between p-4 border-b flex-wrap gap-4">
       <div className="flex items-center gap-4">
         <h1 className="text-2xl font-bold font-headline text-primary">
           Chaos Theory

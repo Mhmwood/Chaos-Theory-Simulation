@@ -4,40 +4,43 @@
 import { useRef, useEffect, forwardRef } from 'react';
 
 type DoublePendulumState = {
-    a1: number; // angle 1
-    a2: number; // angle 2
-    a1_v: number; // angular velocity 1
-    a2_v: number; // angular velocity 2
+    a1: number;
+    a2: number;
+    a1_v: number;
+    a2_v: number;
 };
 
 type PendulumProps = {
-    l1: number; // length 1
-    l2: number; // length 2
-    m1: number; // mass 1
-    m2: number; // mass 2
+    id: number;
+    l1: number;
+    l2: number;
+    m1: number;
+    m2: number;
+    a1: number;
+    a2: number;
+    traceColor: string;
+    pendulumColor: string;
 };
 
 type ChaosCanvasProps = {
-  initialConditions: PendulumProps & { a1: number, a2: number };
-  traceColor: string;
-  pendulumColor: string;
+  systems: PendulumProps[];
   isRunning: boolean;
 };
 
-const G = 0.5; // Gravity
+const G = 0.5;
 const TRACE_LENGTH = 500;
 
+type SystemState = {
+    props: PendulumProps;
+    state: DoublePendulumState;
+    trace: {x: number, y: number}[];
+}
+
 export const ChaosCanvas = forwardRef<HTMLCanvasElement, ChaosCanvasProps>(
-  ({ initialConditions, traceColor, pendulumColor, isRunning }, ref) => {
+  ({ systems, isRunning }, ref) => {
     const internalRef = useRef<HTMLCanvasElement | null>(null);
     const animationFrameId = useRef<number>();
-    const state = useRef<DoublePendulumState>({
-      a1: initialConditions.a1,
-      a2: initialConditions.a2,
-      a1_v: 0,
-      a2_v: 0,
-    });
-    const trace = useRef<{x: number, y: number}[]>([]);
+    const systemStates = useRef<Map<number, SystemState>>(new Map());
 
     const getCanvas = () => {
         if (ref && typeof ref !== "function") return ref.current;
@@ -45,29 +48,29 @@ export const ChaosCanvas = forwardRef<HTMLCanvasElement, ChaosCanvasProps>(
     };
 
     const update = () => {
-      const { l1, l2, m1, m2 } = initialConditions;
-      const { a1, a2, a1_v, a2_v } = state.current;
+        systemStates.current.forEach((sys) => {
+            const { l1, l2, m1, m2 } = sys.props;
+            const { a1, a2, a1_v, a2_v } = sys.state;
 
-      // Equations of motion for the double pendulum
-      // From https://www.myphysicslab.com/pendulum/double-pendulum-en.html
-      let num1 = -G * (2 * m1 + m2) * Math.sin(a1);
-      let num2 = -m2 * G * Math.sin(a1 - 2 * a2);
-      let num3 = -2 * Math.sin(a1 - a2) * m2;
-      let num4 = a2_v * a2_v * l2 + a1_v * a1_v * l1 * Math.cos(a1 - a2);
-      let den = l1 * (2 * m1 + m2 - m2 * Math.cos(2 * a1 - 2 * a2));
-      let a1_a = (num1 + num2 + num3 * num4) / den;
+            let num1 = -G * (2 * m1 + m2) * Math.sin(a1);
+            let num2 = -m2 * G * Math.sin(a1 - 2 * a2);
+            let num3 = -2 * Math.sin(a1 - a2) * m2;
+            let num4 = a2_v * a2_v * l2 + a1_v * a1_v * l1 * Math.cos(a1 - a2);
+            let den = l1 * (2 * m1 + m2 - m2 * Math.cos(2 * a1 - 2 * a2));
+            let a1_a = (num1 + num2 + num3 * num4) / den;
 
-      num1 = 2 * Math.sin(a1 - a2);
-      num2 = a1_v * a1_v * l1 * (m1 + m2);
-      num3 = G * (m1 + m2) * Math.cos(a1);
-      num4 = a2_v * a2_v * l2 * m2 * Math.cos(a1 - a2);
-      den = l2 * (2 * m1 + m2 - m2 * Math.cos(2 * a1 - 2 * a2));
-      let a2_a = (num1 * (num2 + num3 + num4)) / den;
+            num1 = 2 * Math.sin(a1 - a2);
+            num2 = a1_v * a1_v * l1 * (m1 + m2);
+            num3 = G * (m1 + m2) * Math.cos(a1);
+            num4 = a2_v * a2_v * l2 * m2 * Math.cos(a1 - a2);
+            den = l2 * (2 * m1 + m2 - m2 * Math.cos(2 * a1 - 2 * a2));
+            let a2_a = (num1 * (num2 + num3 + num4)) / den;
 
-      state.current.a1_v += a1_a;
-      state.current.a2_v += a2_a;
-      state.current.a1 += state.current.a1_v;
-      state.current.a2 += state.current.a2_v;
+            sys.state.a1_v += a1_a;
+            sys.state.a2_v += a2_a;
+            sys.state.a1 += sys.state.a1_v;
+            sys.state.a2 += sys.state.a2_v;
+        });
     };
 
     const draw = () => {
@@ -80,9 +83,6 @@ export const ChaosCanvas = forwardRef<HTMLCanvasElement, ChaosCanvasProps>(
       const physicalWidth = canvas.width / dpr;
       const physicalHeight = canvas.height / dpr;
       
-      const { l1, l2 } = initialConditions;
-      const { a1, a2 } = state.current;
-
       ctx.save();
       ctx.scale(dpr, dpr);
       ctx.clearRect(0, 0, physicalWidth, physicalHeight);
@@ -90,48 +90,49 @@ export const ChaosCanvas = forwardRef<HTMLCanvasElement, ChaosCanvasProps>(
       const pivotX = physicalWidth / 2;
       const pivotY = physicalHeight / 2.5;
 
-      const x1 = pivotX + l1 * Math.sin(a1);
-      const y1 = pivotY + l1 * Math.cos(a1);
-      const x2 = x1 + l2 * Math.sin(a2);
-      const y2 = y1 + l2 * Math.cos(a2);
+      systemStates.current.forEach((sys) => {
+          const { l1, l2, m1, m2, traceColor, pendulumColor } = sys.props;
+          const { a1, a2 } = sys.state;
 
-      // Add to trace
-      trace.current.push({ x: x2, y: y2 });
-      if (trace.current.length > TRACE_LENGTH) {
-        trace.current.shift();
-      }
-      
-      // Draw trace
-      if (trace.current.length > 1) {
-        ctx.beginPath();
-        ctx.moveTo(trace.current[0].x, trace.current[0].y);
-        for (let i = 1; i < trace.current.length; i++) {
-          ctx.lineTo(trace.current[i].x, trace.current[i].y);
-        }
-        ctx.strokeStyle = traceColor;
-        ctx.lineWidth = 2;
-        ctx.globalAlpha = 0.7;
-        ctx.stroke();
-        ctx.globalAlpha = 1;
-      }
+          const x1 = pivotX + l1 * Math.sin(a1);
+          const y1 = pivotY + l1 * Math.cos(a1);
+          const x2 = x1 + l2 * Math.sin(a2);
+          const y2 = y1 + l2 * Math.cos(a2);
 
-      // Draw pendulum arms
-      ctx.beginPath();
-      ctx.moveTo(pivotX, pivotY);
-      ctx.lineTo(x1, y1);
-      ctx.lineTo(x2, y2);
-      ctx.strokeStyle = pendulumColor;
-      ctx.lineWidth = 3;
-      ctx.stroke();
-      
-      // Draw masses
-      ctx.fillStyle = pendulumColor;
-      ctx.beginPath();
-      ctx.arc(x1, y1, initialConditions.m1, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(x2, y2, initialConditions.m2, 0, Math.PI * 2);
-      ctx.fill();
+          sys.trace.push({ x: x2, y: y2 });
+          if (sys.trace.length > TRACE_LENGTH) {
+            sys.trace.shift();
+          }
+          
+          if (sys.trace.length > 1) {
+            ctx.beginPath();
+            ctx.moveTo(sys.trace[0].x, sys.trace[0].y);
+            for (let i = 1; i < sys.trace.length; i++) {
+              ctx.lineTo(sys.trace[i].x, sys.trace[i].y);
+            }
+            ctx.strokeStyle = traceColor;
+            ctx.lineWidth = 2;
+            ctx.globalAlpha = 0.7;
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+          }
+
+          ctx.beginPath();
+          ctx.moveTo(pivotX, pivotY);
+          ctx.lineTo(x1, y1);
+          ctx.lineTo(x2, y2);
+          ctx.strokeStyle = pendulumColor;
+          ctx.lineWidth = 3;
+          ctx.stroke();
+          
+          ctx.fillStyle = pendulumColor;
+          ctx.beginPath();
+          ctx.arc(x1, y1, m1, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.beginPath();
+          ctx.arc(x2, y2, m2, 0, Math.PI * 2);
+          ctx.fill();
+      });
       ctx.restore();
     };
     
@@ -165,18 +166,30 @@ export const ChaosCanvas = forwardRef<HTMLCanvasElement, ChaosCanvasProps>(
     }, []);
 
     useEffect(() => {
-      // Don't reset state if only colors are changing
-      const isInitialization = !animationFrameId.current;
-      if (isInitialization) {
-        state.current = {
-          a1: initialConditions.a1,
-          a2: initialConditions.a2,
-          a1_v: 0,
-          a2_v: 0,
-        };
-        trace.current = [];
+      // Initialize or update system states
+      const newSystemStates = new Map<number, SystemState>();
+      for (const sysProps of systems) {
+          const existing = systemStates.current.get(sysProps.id);
+          if (existing) {
+              // Preserve trace and physics state, but update props (like colors)
+              existing.props = sysProps;
+              newSystemStates.set(sysProps.id, existing);
+          } else {
+              // New system, initialize it
+              newSystemStates.set(sysProps.id, {
+                  props: sysProps,
+                  state: {
+                      a1: sysProps.a1,
+                      a2: sysProps.a2,
+                      a1_v: 0,
+                      a2_v: 0,
+                  },
+                  trace: [],
+              });
+          }
       }
-      
+      systemStates.current = newSystemStates;
+
       if (animationFrameId.current) {
         cancelAnimationFrame(animationFrameId.current);
       }
@@ -187,19 +200,7 @@ export const ChaosCanvas = forwardRef<HTMLCanvasElement, ChaosCanvasProps>(
           cancelAnimationFrame(animationFrameId.current);
         }
       };
-    }, [isRunning, initialConditions, traceColor, pendulumColor]);
-
-
-    useEffect(() => {
-      // This separate effect handles full restarts when initialConditions change.
-      state.current = {
-        a1: initialConditions.a1,
-        a2: initialConditions.a2,
-        a1_v: 0,
-        a2_v: 0,
-      };
-      trace.current = [];
-    }, [initialConditions])
+    }, [isRunning, systems]);
 
     return (
       <canvas

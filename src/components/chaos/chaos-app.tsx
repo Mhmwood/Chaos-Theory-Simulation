@@ -1,19 +1,20 @@
 
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { Header } from "@/components/chaos/header";
 import { ChaosCanvas } from "@/components/chaos/canvas";
 import { ControlPanel } from "@/components/chaos/controls";
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { SlidersHorizontal } from "lucide-react";
+import { SlidersHorizontal, PlusCircle } from "lucide-react";
 
 export type PendulumParams = {
   l1: number;
@@ -27,58 +28,89 @@ export type AppearanceParams = {
     pendulumColor: string;
 }
 
+export type PendulumSystem = {
+    id: number;
+    params: PendulumParams;
+    appearance: AppearanceParams;
+    initialAngles: { a1: number; a2: number };
+};
+
+const createNewPendulum = (id: number): PendulumSystem => {
+    const randomAngle = () => Math.PI / 2 + (Math.random() - 0.5) * 0.5;
+    return {
+        id,
+        params: {
+            l1: 100 + Math.random() * 100,
+            l2: 100 + Math.random() * 100,
+            m1: 8 + Math.random() * 14,
+            m2: 8 + Math.random() * 14,
+        },
+        appearance: {
+            traceColor: `hsl(${Math.random() * 360}, 100%, 75%)`,
+            pendulumColor: `hsl(${Math.random() * 360}, 100%, 75%)`,
+        },
+        initialAngles: {
+            a1: randomAngle(),
+            a2: randomAngle() + (Math.random() - 0.5) * 0.01, // Tiny difference
+        },
+    };
+};
+
+
 export function ChaosApp() {
-  const [params, setParams] = useState<PendulumParams>({
-    l1: 150,
-    l2: 150,
-    m1: 10,
-    m2: 10,
-  });
-
-  const [appearance, setAppearance] = useState<AppearanceParams>({
-      traceColor: "#FFFF00",
-      pendulumColor: "#FF00FF"
-  });
-
+  const [pendulums, setPendulums] = useState<PendulumSystem[]>([]);
   const [isRunning, setIsRunning] = useState(true);
-
-  // A key to force-remount the canvas and restart the simulation
   const [simulationKey, setSimulationKey] = useState(Date.now());
-  
-  const handleRestart = () => {
-    setIsRunning(false);
-    // Give it a moment to stop, then restart
-    setTimeout(() => {
-        setSimulationKey(Date.now());
-        setIsRunning(true);
-    }, 100);
-  };
-  
+
   useEffect(() => {
-    // Start the simulation on mount
-    handleRestart();
+    // Start with one pendulum on mount
+    setPendulums([createNewPendulum(1)]);
+  }, []);
+  
+  const handleRestart = useCallback(() => {
+    setIsRunning(false);
+    setTimeout(() => {
+      setSimulationKey(Date.now());
+      setIsRunning(true);
+    }, 50);
   }, []);
 
-  const handleParamChange = (newParams: Partial<PendulumParams>) => {
-    setParams(prev => ({ ...prev, ...newParams }));
+  const handleAddPendulum = () => {
+    setPendulums(prev => [...prev, createNewPendulum(Date.now())]);
+    handleRestart();
+  };
+
+  const handleRemovePendulum = (id: number) => {
+    setPendulums(prev => prev.filter(p => p.id !== id));
+  };
+  
+  const handleParamChange = (id: number, newParams: Partial<PendulumParams>) => {
+    setPendulums(prev => prev.map(p => p.id === id ? { ...p, params: { ...p.params, ...newParams } } : p));
     handleRestart();
   }
 
-  const handleAppearanceChange = (newAppearance: Partial<AppearanceParams>) => {
-    setAppearance(prev => ({ ...prev, ...newAppearance }));
+  const handleAppearanceChange = (id: number, newAppearance: Partial<AppearanceParams>) => {
+     setPendulums(prev => prev.map(p => p.id === id ? { ...p, appearance: { ...p.appearance, ...newAppearance } } : p));
   }
 
-  const initialConditions = useMemo(() => ({
-    ...params,
-    a1: Math.PI / 1.5,
-    a2: Math.PI / 1.501, // Tiny difference to show chaos
-  }), [params, simulationKey]);
+  const simulationSystems = useMemo(() => pendulums.map(p => ({
+    id: p.id,
+    ...p.params,
+    ...p.appearance,
+    a1: p.initialAngles.a1,
+    a2: p.initialAngles.a2,
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  })), [pendulums, simulationKey]);
 
 
   return (
     <Sheet>
       <div className="flex flex-col h-screen bg-black text-foreground">
         <Header onRestart={handleRestart}>
+             <Button onClick={handleAddPendulum} variant="outline">
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Add Pendulum
+            </Button>
             <SheetTrigger asChild>
                 <Button variant="outline">
                     <SlidersHorizontal className="mr-2 h-4 w-4" />
@@ -90,23 +122,24 @@ export function ChaosApp() {
           <section className="flex-1 bg-black border rounded-lg overflow-hidden relative m-4">
             <ChaosCanvas
               key={simulationKey}
-              initialConditions={initialConditions}
-              traceColor={appearance.traceColor}
-              pendulumColor={appearance.pendulumColor}
+              systems={simulationSystems}
               isRunning={isRunning}
             />
           </section>
         </main>
-        <SheetContent side="bottom" className="bg-black border-t">
+        <SheetContent side="bottom" className="bg-black border-t h-[75vh] flex flex-col">
             <SheetHeader>
                 <SheetTitle>Controls</SheetTitle>
+                <SheetDescription>
+                  Manage the properties of each independent pendulum system.
+                </SheetDescription>
             </SheetHeader>
-            <div className="py-4">
+            <div className="py-4 flex-1 overflow-y-auto">
                 <ControlPanel 
-                    params={params} 
+                    pendulums={pendulums}
                     onParamChange={handleParamChange}
-                    appearance={appearance}
                     onAppearanceChange={handleAppearanceChange}
+                    onRemovePendulum={handleRemovePendulum}
                 />
             </div>
         </SheetContent>
