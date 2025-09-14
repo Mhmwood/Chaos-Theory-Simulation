@@ -2,8 +2,6 @@
 
 This project is an interactive web application that visualizes the chaotic motion of the double pendulum, a classic example of the butterfly effect. Built with Next.js and rendered on an HTML5 Canvas, this simulation allows you to explore how tiny changes in initial conditions can lead to vastly different outcomes.
 
-![A screenshot of multiple double pendulums drawing colorful, chaotic paths on a dark background.](https://storage.googleapis.com/studiop-project-emblems/chaos-theory-screenshot.png)
-
 ## Key Features
 
 - **Real-time Simulation**: Watch the mesmerizing and unpredictable paths of double pendulums unfold in real-time.
