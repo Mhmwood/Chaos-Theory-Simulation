@@ -126,25 +126,25 @@ export function ChaosApp() {
 
   return (
     <Sheet>
-      <div className="flex flex-col h-screen bg-black text-foreground">
+      <div className="flex flex-col h-screen bg-background text-foreground">
         <Header 
             onRestart={handleRestart}
             onZoomIn={handleZoomIn}
             onZoomOut={handleZoomOut}
         >
-             <Button onClick={handleAddPendulum} variant="outline">
+             <Button onClick={handleAddPendulum} variant="outline" size="sm">
                 <PlusCircle className="mr-2 h-4 w-4" />
-                Add Pendulum
+                Add
             </Button>
             <SheetTrigger asChild>
-                <Button variant="outline">
+                <Button variant="outline" size="sm">
                     <SlidersHorizontal className="mr-2 h-4 w-4" />
                     Controls
                 </Button>
             </SheetTrigger>
         </Header>
         <main className="flex-1 flex flex-col min-h-0">
-          <section className="flex-1 bg-black border rounded-lg overflow-hidden relative m-4">
+          <section className="flex-1 bg-background border rounded-lg overflow-hidden relative m-2 sm:m-4">
             <ChaosCanvas
               key={simulationKey}
               systems={simulationSystems}
@@ -153,7 +153,7 @@ export function ChaosApp() {
             />
           </section>
         </main>
-        <SheetContent side="bottom" className="bg-black border-t h-[75vh] flex flex-col">
+        <SheetContent side="bottom" className="bg-background border-t h-[75vh] flex flex-col">
             <SheetHeader>
                 <SheetTitle>Controls</SheetTitle>
                 <SheetDescription>
