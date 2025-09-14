@@ -21,7 +21,7 @@ type ControlPanelProps = {
   onParamChange: (id: number, newParams: Partial<PendulumParams>) => void;
   onAppearanceChange: (id: number, newAppearance: Partial<AppearanceParams>) => void;
   onRemovePendulum: (id: number) => void;
-  onSyncPhysics: () => void;
+  onSyncPhysics: (sourceId: number) => void;
 };
 
 export function ControlPanel({ pendulums, onParamChange, onAppearanceChange, onRemovePendulum, onSyncPhysics }: ControlPanelProps) {
@@ -55,9 +55,9 @@ export function ControlPanel({ pendulums, onParamChange, onAppearanceChange, onR
                         </AccordionTrigger>
                         <AccordionContent>
                             <div className="grid gap-4 pt-2">
-                                {pendulums.length > 1 && index === 0 && (
+                                {pendulums.length > 1 && (
                                     <div className="pt-2">
-                                        <Button onClick={onSyncPhysics} className="w-full" variant="secondary">
+                                        <Button onClick={() => onSyncPhysics(p.id)} className="w-full" variant="secondary">
                                             <Copy className="mr-2 h-4 w-4" />
                                             Sync All Physics to This Pendulum
                                         </Button>

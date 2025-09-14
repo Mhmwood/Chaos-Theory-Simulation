@@ -97,18 +97,19 @@ export function ChaosApp() {
      setPendulums(prev => prev.map(p => p.id === id ? { ...p, appearance: { ...p.appearance, ...newAppearance } } : p));
   }
 
-  const handleSyncPhysics = useCallback(() => {
-    if (pendulums.length < 2) return;
-
+  const handleSyncPhysics = useCallback((sourceId: number) => {
     setPendulums(prev => {
-        const firstPendulumParams = prev[0].params;
+        const sourcePendulum = prev.find(p => p.id === sourceId);
+        if (!sourcePendulum) return prev;
+        
+        const sourceParams = sourcePendulum.params;
         return prev.map(p => ({
             ...p,
-            params: firstPendulumParams,
+            params: sourceParams,
         }));
     });
     handleRestart();
-  }, [pendulums, handleRestart]);
+  }, [handleRestart]);
 
   const handleZoomIn = () => setZoom(z => Math.min(z * 1.2, 5));
   const handleZoomOut = () => setZoom(z => Math.max(z / 1.2, 0.2));
