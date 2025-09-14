@@ -1,8 +1,10 @@
+
 "use client";
 
-import { PendulumParams } from "./chaos-app";
+import { PendulumParams, AppearanceParams } from "./chaos-app";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
+import { Input } from "@/components/ui/input";
 import {
   Accordion,
   AccordionContent,
@@ -13,11 +15,13 @@ import {
 type ControlPanelProps = {
   params: PendulumParams;
   onParamChange: (newParams: Partial<PendulumParams>) => void;
+  appearance: AppearanceParams;
+  onAppearanceChange: (newAppearance: Partial<AppearanceParams>) => void;
 };
 
-export function ControlPanel({ params, onParamChange }: ControlPanelProps) {
+export function ControlPanel({ params, onParamChange, appearance, onAppearanceChange }: ControlPanelProps) {
   return (
-      <Accordion type="multiple" defaultValue={["item-1", "item-2"]} className="w-full">
+      <Accordion type="multiple" defaultValue={["item-1", "item-2", "item-3"]} className="w-full">
         <AccordionItem value="item-1">
           <AccordionTrigger>
             <h3 className="text-lg font-semibold">Pendulum 1</h3>
@@ -87,6 +91,41 @@ export function ControlPanel({ params, onParamChange }: ControlPanelProps) {
                         onValueChange={(value) => onParamChange({ m2: value[0] })}
                         />
                          <span className="text-sm font-medium w-12 text-right">{params.m2}</span>
+                    </div>
+                </div>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+         <AccordionItem value="item-3">
+          <AccordionTrigger>
+            <h3 className="text-lg font-semibold">Appearance</h3>
+          </AccordionTrigger>
+          <AccordionContent>
+            <div className="grid grid-cols-2 gap-4 pt-2">
+                <div className="grid gap-2">
+                    <Label htmlFor="traceColor">Trace Color</Label>
+                    <div className="flex items-center gap-2">
+                       <Input
+                          id="traceColor"
+                          type="color"
+                          value={appearance.traceColor}
+                          onChange={(e) => onAppearanceChange({ traceColor: e.target.value })}
+                          className="w-12 h-10 p-1"
+                        />
+                        <span className="text-sm font-medium">{appearance.traceColor}</span>
+                    </div>
+                </div>
+                <div className="grid gap-2">
+                    <Label htmlFor="pendulumColor">Pendulum Color</Label>
+                     <div className="flex items-center gap-2">
+                        <Input
+                          id="pendulumColor"
+                          type="color"
+                          value={appearance.pendulumColor}
+                          onChange={(e) => onAppearanceChange({ pendulumColor: e.target.value })}
+                          className="w-12 h-10 p-1"
+                        />
+                        <span className="text-sm font-medium">{appearance.pendulumColor}</span>
                     </div>
                 </div>
             </div>

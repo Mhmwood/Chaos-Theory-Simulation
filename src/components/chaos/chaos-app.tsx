@@ -22,12 +22,22 @@ export type PendulumParams = {
   m2: number;
 };
 
+export type AppearanceParams = {
+    traceColor: string;
+    pendulumColor: string;
+}
+
 export function ChaosApp() {
   const [params, setParams] = useState<PendulumParams>({
     l1: 150,
     l2: 150,
     m1: 10,
     m2: 10,
+  });
+
+  const [appearance, setAppearance] = useState<AppearanceParams>({
+      traceColor: "#FFFF00",
+      pendulumColor: "#FF00FF"
   });
 
   const [isRunning, setIsRunning] = useState(true);
@@ -54,6 +64,10 @@ export function ChaosApp() {
     handleRestart();
   }
 
+  const handleAppearanceChange = (newAppearance: Partial<AppearanceParams>) => {
+    setAppearance(prev => ({ ...prev, ...newAppearance }));
+  }
+
   const initialConditions = useMemo(() => ({
     ...params,
     a1: Math.PI / 1.5,
@@ -77,8 +91,8 @@ export function ChaosApp() {
             <ChaosCanvas
               key={simulationKey}
               initialConditions={initialConditions}
-              traceColor="#FFFF00"
-              pendulumColor="#FF00FF"
+              traceColor={appearance.traceColor}
+              pendulumColor={appearance.pendulumColor}
               isRunning={isRunning}
             />
           </section>
@@ -88,7 +102,12 @@ export function ChaosApp() {
                 <SheetTitle>Controls</SheetTitle>
             </SheetHeader>
             <div className="py-4">
-                <ControlPanel params={params} onParamChange={handleParamChange} />
+                <ControlPanel 
+                    params={params} 
+                    onParamChange={handleParamChange}
+                    appearance={appearance}
+                    onAppearanceChange={handleAppearanceChange}
+                />
             </div>
         </SheetContent>
       </div>
