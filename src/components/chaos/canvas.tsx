@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useRef, useEffect, forwardRef } from 'react';
@@ -164,13 +165,17 @@ export const ChaosCanvas = forwardRef<HTMLCanvasElement, ChaosCanvasProps>(
     }, []);
 
     useEffect(() => {
-      state.current = {
-        a1: initialConditions.a1,
-        a2: initialConditions.a2,
-        a1_v: 0,
-        a2_v: 0,
-      };
-      trace.current = [];
+      // Don't reset state if only colors are changing
+      const isInitialization = !animationFrameId.current;
+      if (isInitialization) {
+        state.current = {
+          a1: initialConditions.a1,
+          a2: initialConditions.a2,
+          a1_v: 0,
+          a2_v: 0,
+        };
+        trace.current = [];
+      }
       
       if (animationFrameId.current) {
         cancelAnimationFrame(animationFrameId.current);
@@ -182,7 +187,19 @@ export const ChaosCanvas = forwardRef<HTMLCanvasElement, ChaosCanvasProps>(
           cancelAnimationFrame(animationFrameId.current);
         }
       };
-    }, [isRunning, initialConditions]);
+    }, [isRunning, initialConditions, traceColor, pendulumColor]);
+
+
+    useEffect(() => {
+      // This separate effect handles full restarts when initialConditions change.
+      state.current = {
+        a1: initialConditions.a1,
+        a2: initialConditions.a2,
+        a1_v: 0,
+        a2_v: 0,
+      };
+      trace.current = [];
+    }, [initialConditions])
 
     return (
       <canvas
