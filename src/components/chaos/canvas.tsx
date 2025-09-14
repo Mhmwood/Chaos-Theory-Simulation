@@ -115,7 +115,7 @@ export const ChaosCanvas = forwardRef<HTMLCanvasElement, ChaosCanvasProps>(
               ctx.lineTo(sys.trace[i].x, sys.trace[i].y);
             }
             ctx.strokeStyle = traceColor;
-            ctx.lineWidth = 2 / zoom;
+            ctx.lineWidth = 2 ;
             ctx.globalAlpha = 0.7;
             ctx.stroke();
             ctx.globalAlpha = 1;
@@ -126,15 +126,15 @@ export const ChaosCanvas = forwardRef<HTMLCanvasElement, ChaosCanvasProps>(
           ctx.lineTo(x1, y1);
           ctx.lineTo(x2, y2);
           ctx.strokeStyle = pendulumColor;
-          ctx.lineWidth = 3 / zoom;
+          ctx.lineWidth = 3 ;
           ctx.stroke();
           
           ctx.fillStyle = pendulumColor;
           ctx.beginPath();
-          ctx.arc(x1, y1, m1 / zoom, 0, Math.PI * 2);
+          ctx.arc(x1, y1, m1 , 0, Math.PI * 2);
           ctx.fill();
           ctx.beginPath();
-          ctx.arc(x2, y2, m2 / zoom, 0, Math.PI * 2);
+          ctx.arc(x2, y2, m2 , 0, Math.PI * 2);
           ctx.fill();
       });
       ctx.restore();
