@@ -96,6 +96,19 @@ export function ChaosApp() {
      setPendulums(prev => prev.map(p => p.id === id ? { ...p, appearance: { ...p.appearance, ...newAppearance } } : p));
   }
 
+  const handleSyncPhysics = useCallback(() => {
+    if (pendulums.length < 2) return;
+
+    setPendulums(prev => {
+        const firstPendulumParams = prev[0].params;
+        return prev.map(p => ({
+            ...p,
+            params: firstPendulumParams,
+        }));
+    });
+    handleRestart();
+  }, [pendulums, handleRestart]);
+
   const simulationSystems = useMemo(() => pendulums.map(p => ({
     id: p.id,
     ...p.params,
@@ -143,6 +156,7 @@ export function ChaosApp() {
                     onParamChange={handleParamChange}
                     onAppearanceChange={handleAppearanceChange}
                     onRemovePendulum={handleRemovePendulum}
+                    onSyncPhysics={handleSyncPhysics}
                 />
             </div>
         </SheetContent>

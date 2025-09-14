@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Trash2, Copy } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -21,9 +21,10 @@ type ControlPanelProps = {
   onParamChange: (id: number, newParams: Partial<PendulumParams>) => void;
   onAppearanceChange: (id: number, newAppearance: Partial<AppearanceParams>) => void;
   onRemovePendulum: (id: number) => void;
+  onSyncPhysics: () => void;
 };
 
-export function ControlPanel({ pendulums, onParamChange, onAppearanceChange, onRemovePendulum }: ControlPanelProps) {
+export function ControlPanel({ pendulums, onParamChange, onAppearanceChange, onRemovePendulum, onSyncPhysics }: ControlPanelProps) {
   
   if (pendulums.length === 0) {
     return (
@@ -36,6 +37,14 @@ export function ControlPanel({ pendulums, onParamChange, onAppearanceChange, onR
   return (
       <ScrollArea className="h-full">
         <div className="space-y-4 pr-6">
+            {pendulums.length > 1 && (
+                <div className="px-4">
+                    <Button onClick={onSyncPhysics} className="w-full" variant="secondary">
+                        <Copy className="mr-2 h-4 w-4" />
+                        Sync All Physics Parameters
+                    </Button>
+                </div>
+            )}
             {pendulums.map((p, index) => (
                 <div key={p.id} className="rounded-lg border p-4">
                     <div className="flex justify-between items-center mb-2">
