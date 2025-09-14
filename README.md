@@ -1,3 +1,6 @@
+
+# The link  https://chaos-theory-simulation.netlify.app/
+
 # Chaos Theory: An Interactive Double Pendulum Simulation
 
 This project is an interactive web application that visualizes the chaotic motion of the double pendulum, a classic example of the butterfly effect. Built with Next.js and rendered on an HTML5 Canvas, this simulation allows you to explore how tiny changes in initial conditions can lead to vastly different outcomes.
