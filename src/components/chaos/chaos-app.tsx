@@ -64,6 +64,7 @@ export function ChaosApp() {
   const [pendulums, setPendulums] = useState<PendulumSystem[]>([]);
   const [isRunning, setIsRunning] = useState(true);
   const [simulationKey, setSimulationKey] = useState(Date.now());
+  const [zoom, setZoom] = useState(1);
 
   useEffect(() => {
     // Start with one pendulum on mount
@@ -109,6 +110,9 @@ export function ChaosApp() {
     handleRestart();
   }, [pendulums, handleRestart]);
 
+  const handleZoomIn = () => setZoom(z => Math.min(z * 1.2, 5));
+  const handleZoomOut = () => setZoom(z => Math.max(z / 1.2, 0.2));
+
   const simulationSystems = useMemo(() => pendulums.map(p => ({
     id: p.id,
     ...p.params,
@@ -122,7 +126,11 @@ export function ChaosApp() {
   return (
     <Sheet>
       <div className="flex flex-col h-screen bg-black text-foreground">
-        <Header onRestart={handleRestart}>
+        <Header 
+            onRestart={handleRestart}
+            onZoomIn={handleZoomIn}
+            onZoomOut={handleZoomOut}
+        >
              <Button onClick={handleAddPendulum} variant="outline">
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Add Pendulum
@@ -140,6 +148,7 @@ export function ChaosApp() {
               key={simulationKey}
               systems={simulationSystems}
               isRunning={isRunning}
+              zoom={zoom}
             />
           </section>
         </main>
