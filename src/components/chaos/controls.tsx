@@ -57,9 +57,9 @@ export function ControlPanel({ pendulums, onParamChange, onAppearanceChange, onR
                             <div className="grid gap-4 pt-2">
                                 {pendulums.length > 1 && (
                                     <div className="pt-2">
-                                        <Button onClick={() => onSyncPhysics(p.id)} className="w-full" variant="secondary" size="sm">
+                                        <Button onClick={() => onSyncPhysics(p.id)} className="w-full" variant="outline" size="sm">
                                             <Copy className="mr-2 h-4 w-4" />
-                                            Sync All Physics to This Pendulum
+                                            Copy Physics to All
                                         </Button>
                                     <Separator className="my-4" />
                                     </div>
