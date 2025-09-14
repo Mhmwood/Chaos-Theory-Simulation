@@ -37,14 +37,6 @@ export function ControlPanel({ pendulums, onParamChange, onAppearanceChange, onR
   return (
       <ScrollArea className="h-full">
         <div className="space-y-4 pr-6">
-            {pendulums.length > 1 && (
-                <div className="px-4">
-                    <Button onClick={onSyncPhysics} className="w-full" variant="secondary">
-                        <Copy className="mr-2 h-4 w-4" />
-                        Sync All Physics Parameters
-                    </Button>
-                </div>
-            )}
             {pendulums.map((p, index) => (
                 <div key={p.id} className="rounded-lg border p-4">
                     <div className="flex justify-between items-center mb-2">
@@ -63,6 +55,15 @@ export function ControlPanel({ pendulums, onParamChange, onAppearanceChange, onR
                         </AccordionTrigger>
                         <AccordionContent>
                             <div className="grid gap-4 pt-2">
+                                {pendulums.length > 1 && index === 0 && (
+                                    <div className="pt-2">
+                                        <Button onClick={onSyncPhysics} className="w-full" variant="secondary">
+                                            <Copy className="mr-2 h-4 w-4" />
+                                            Sync All Physics to This Pendulum
+                                        </Button>
+                                    <Separator className="my-4" />
+                                    </div>
+                                )}
                                 <div className="grid gap-2">
                                     <Label htmlFor={`l1-${p.id}`}>Length 1 (l1)</Label>
                                     <div className="flex items-center gap-4">
